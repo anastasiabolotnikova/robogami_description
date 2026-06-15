@@ -113,10 +113,17 @@ urdf = open("../urdf/"+urdf_file, "w")
 
 # URDF general info
 urdf.write('<?xml version="1.0" ?>\n')
-urdf.write('<robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">\n')
-urdf.write('\t<material name="Gray">\n')
-urdf.write('\t\t<color rgba="0.1 0.1 0.1 1.0"/>\n')
-urdf.write('\t</material>\n\n')
+urdf.write('<robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">\n\n')
+
+# Link materials genersting function (for visualization/debugging)
+def generate_urdf_material_color(name, rgbs):
+    r, g, b, a = rgbs
+
+    return "\n".join([
+        f'\t<material name="{name}">',
+        f'\t\t<color rgba="{r} {g} {b} {a}"/>',
+        '\t</material>\n'
+    ])
 
 # Link URDF string generating function
 def generate_link_urdf_str(link_name, mesh_name, offset=0):
@@ -177,34 +184,92 @@ def generate_spherical_joint_urdf_str(parent_link, child_link, extra_link1, extr
         '\t</joint>\n\n'
     ])
 
+# Corner collision links generating function
+def generate_corner_collision_links(link_name, parent_link, joint_origin, material):
+    return "\n".join([
+        '\t<link name="{}">'.format(link_name),
+        '\t\t<visual>',
+        '\t\t\t<geometry>',
+        '\t\t\t\t<sphere radius="0.001"/>',
+        '\t\t\t</geometry>\n',
+        '\t\t\t<material name="{}"/>'.format(material),
+        '\t\t</visual>',
+        '\t\t<collision>',
+        '\t\t\t<geometry>',
+        '\t\t\t\t<sphere radius="0.001"/>',
+        '\t\t\t</geometry>',
+        '\t\t</collision>',
+        '\t</link>',
+        '\n\t<joint name="{}" type="fixed">'.format(link_name+"_joint"),
+        '\t\t<parent link="{}"/>'.format(parent_link),
+        '\t\t<child link="{}"/>'.format(link_name),
+        '\t\t<origin rpy="0 0 0" xyz="{} {} {}"/>'.format(*joint_origin),
+        '\t</joint>\n'
+    ])
+
+# Materials
+urdf.write(generate_urdf_material_color("Gray", (0.1, 0.1, 0.1, 0.7)))
+urdf.write(generate_urdf_material_color("Red", (1, 0, 0, 1.0)))
+urdf.write(generate_urdf_material_color("Green", (0, 1, 0, 1.0)))
+urdf.write(generate_urdf_material_color("Blue", (0, 0, 1, 1.0)))
+
 # Base hexagon link
+urdf.write('\n\t<!-- Base hexagon link -->\n')
 urdf.write(generate_link_urdf_str("base", "base"))
 
 # Legs lower links
+urdf.write('\n\t<!-- Legs lower links -->\n')
 urdf.write(generate_link_urdf_str("leg1", "leg"))
 urdf.write(generate_link_urdf_str("leg2", "leg"))
 urdf.write(generate_link_urdf_str("leg3", "leg"))
 
 # Joints connecting leg lower links to the hexagon base link (actuated DoFs)
+urdf.write('\n\t<!-- Joints connecting leg lower links to the hexagon base link -->\n')
 urdf.write(generate_joint_urdf_str("l1", "base", "leg1", 0, 1.4, "0 1 0", [0, 0, 0], [-base_r, 0, 0]))
 urdf.write(generate_joint_urdf_str("l2", "base", "leg2", 0, 1.4, "0 1 0", [0, 0, radians(120.0)], [base_a/4.0*sqrt(3), -3.0*base_a/4.0, 0]))
 urdf.write(generate_joint_urdf_str("l3", "base", "leg3", 0, 1.4, "0 1 0", [0, 0, radians(-120.0)], [base_a/4.0*sqrt(3), 3.0*base_a/4.0, 0]))
 
 # Legs upper links
+urdf.write('\n\t<!-- Legs upper links -->\n')
 urdf.write(generate_link_urdf_str("leg1top", "leg", side_H))
 urdf.write(generate_link_urdf_str("leg2top", "leg", side_H))
 urdf.write(generate_link_urdf_str("leg3top", "leg", side_H))
 
 # Spherical joints connecting leg lower and upper links (unactuated DoFs)
+urdf.write('\n\t<!-- Spherical joints connecting leg lower and upper links -->\n')
 urdf.write(generate_spherical_joint_urdf_str("leg1", "leg1top", "l1RotX", "l1RotY", "x_l1rotx", "x_l1roty", "x_l1top"))
 urdf.write(generate_spherical_joint_urdf_str("leg2", "leg2top", "l2RotX", "l2RotY", "x_l2rotx", "x_l2roty", "x_l2top"))
 urdf.write(generate_spherical_joint_urdf_str("leg3", "leg3top", "l3RotX", "l3RotY", "x_l3rotx", "x_l3roty", "x_l3top"))
 
 # Top hexagon link
+urdf.write('\n\t<!-- Top hexagon link -->\n')
 urdf.write(generate_link_urdf_str("top", "base", -base_r))
 
 # Leg1 joint to top hexagon link
+urdf.write('\n\t<!-- Leg1 joint to top hexagon link -->\n')
 urdf.write(generate_joint_urdf_str("l1topBase", "leg1top", "top", 0, 1.56, "0 1 0", [0, radians(180.0), 0], [side_H, 0, 0]))
+
+# Two extra virtual links and associalted joints for defining closed chains
+urdf.write('\n\t<!-- Two extra virtual links and associalted joints for defining closed chains -->\n')
+urdf.write('\t<link name="leg2TopMove"/>\n\n')
+urdf.write('\t<link name="leg3TopMove"/>\n\n')
+urdf.write(generate_joint_urdf_str("l2TopMove", "leg2top", "leg2TopMove", 0, 1.56, "0 1 0", [0, 0, 0], [side_H, 0, 0]))
+urdf.write(generate_joint_urdf_str("l3TopMove", "leg3top", "leg3TopMove", 0, 1.56, "0 1 0", [0, 0, 0], [side_H, 0, 0]))
+
+# Corner collision links
+urdf.write('\n\t<!-- Corner collision shapes -->\n')
+urdf.write(generate_corner_collision_links("leg1lowerLeftConner", "leg1", [-side_b, -side_a/2.0, 0], "Red"))
+urdf.write(generate_corner_collision_links("leg1lowerRightConner", "leg1", [-side_b, side_a/2.0, 0], "Red"))
+urdf.write(generate_corner_collision_links("leg1topLeftConner", "leg1top", [side_h, -side_a/2.0, 0], "Red"))
+urdf.write(generate_corner_collision_links("leg1topRightConner", "leg1top", [side_h, side_a/2.0, 0], "Red"))
+urdf.write(generate_corner_collision_links("leg2lowerLeftConner", "leg2", [-side_b, -side_a/2.0, 0], "Green"))
+urdf.write(generate_corner_collision_links("leg2lowerRightConner", "leg2", [-side_b, side_a/2.0, 0], "Green"))
+urdf.write(generate_corner_collision_links("leg2topLeftConner", "leg2top", [side_h, -side_a/2.0, 0], "Green"))
+urdf.write(generate_corner_collision_links("leg2topRightConner", "leg2top", [side_h, side_a/2.0, 0], "Green"))
+urdf.write(generate_corner_collision_links("leg3lowerLeftConner", "leg3", [-side_b, -side_a/2.0, 0], "Blue"))
+urdf.write(generate_corner_collision_links("leg3lowerRightConner", "leg3", [-side_b, side_a/2.0, 0], "Blue"))
+urdf.write(generate_corner_collision_links("leg3topLeftConner", "leg3top", [side_h, -side_a/2.0, 0], "Blue"))
+urdf.write(generate_corner_collision_links("leg3topRightConner", "leg3top", [side_h, side_a/2.0, 0], "Blue"))
 
 # Done!
 urdf.write('\n</robot>')

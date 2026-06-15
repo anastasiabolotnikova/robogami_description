@@ -1,9 +1,20 @@
 <?xml version="1.0" ?>
 <robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
 	<material name="Gray">
-		<color rgba="0.1 0.1 0.1 1.0"/>
+		<color rgba="0.1 0.1 0.1 0.7"/>
+	</material>
+	<material name="Red">
+		<color rgba="1 0 0 1.0"/>
+	</material>
+	<material name="Green">
+		<color rgba="0 1 0 1.0"/>
+	</material>
+	<material name="Blue">
+		<color rgba="0 0 1 1.0"/>
 	</material>
 
+	<!-- Base hexagon link -->
 	<link name="base">
 		<inertial>
 			<mass value="0.01" />
@@ -19,6 +30,8 @@
 		</visual>
 	</link>
 
+
+	<!-- Legs lower links -->
 	<link name="leg1">
 		<inertial>
 			<mass value="0.01" />
@@ -64,6 +77,8 @@
 		</visual>
 	</link>
 
+
+	<!-- Joints connecting leg lower links to the hexagon base link -->
 	<joint name="l1" type="revolute">
 		<parent link="base"/>
 		<child link="leg1"/>
@@ -88,6 +103,8 @@
 		<origin rpy="0 0 -2.0943951023931953" xyz="0.028145825622994256 0.04875 0"/>
 	</joint>
 
+
+	<!-- Legs upper links -->
 	<link name="leg1top">
 		<inertial>
 			<mass value="0.01" />
@@ -133,6 +150,8 @@
 		</visual>
 	</link>
 
+
+	<!-- Spherical joints connecting leg lower and upper links -->
 	<link name="l1RotX"/>
 
 	<link name="l1RotY"/>
@@ -217,6 +236,8 @@
 		<origin rpy="0 0 0" xyz="0 0 0"/>
 	</joint>
 
+
+	<!-- Top hexagon link -->
 	<link name="top">
 		<inertial>
 			<mass value="0.01" />
@@ -232,6 +253,8 @@
 		</visual>
 	</link>
 
+
+	<!-- Leg1 joint to top hexagon link -->
 	<joint name="l1topBase" type="revolute">
 		<parent link="leg1top"/>
 		<child link="top"/>
@@ -240,5 +263,269 @@
 		<origin rpy="0 3.141592653589793 0" xyz="0.059 0 0"/>
 	</joint>
 
+
+	<!-- Two extra virtual links and associalted joints for defining closed chains -->
+	<link name="leg2TopMove"/>
+
+	<link name="leg3TopMove"/>
+
+	<joint name="l2TopMove" type="revolute">
+		<parent link="leg2top"/>
+		<child link="leg2TopMove"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0" upper="1.56" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0.059 0 0"/>
+	</joint>
+
+	<joint name="l3TopMove" type="revolute">
+		<parent link="leg3top"/>
+		<child link="leg3TopMove"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0" upper="1.56" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0.059 0 0"/>
+	</joint>
+
+
+	<!-- Corner collision shapes -->
+	<link name="leg1lowerLeftConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Red"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg1lowerLeftConner_joint" type="fixed">
+		<parent link="leg1"/>
+		<child link="leg1lowerLeftConner"/>
+		<origin rpy="0 0 0" xyz="-0.038442059036156634 -0.0245 0"/>
+	</joint>
+	<link name="leg1lowerRightConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Red"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg1lowerRightConner_joint" type="fixed">
+		<parent link="leg1"/>
+		<child link="leg1lowerRightConner"/>
+		<origin rpy="0 0 0" xyz="-0.038442059036156634 0.0245 0"/>
+	</joint>
+	<link name="leg1topLeftConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Red"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg1topLeftConner_joint" type="fixed">
+		<parent link="leg1top"/>
+		<child link="leg1topLeftConner"/>
+		<origin rpy="0 0 0" xyz="0.02055794096384336 -0.0245 0"/>
+	</joint>
+	<link name="leg1topRightConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Red"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg1topRightConner_joint" type="fixed">
+		<parent link="leg1top"/>
+		<child link="leg1topRightConner"/>
+		<origin rpy="0 0 0" xyz="0.02055794096384336 0.0245 0"/>
+	</joint>
+	<link name="leg2lowerLeftConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Green"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg2lowerLeftConner_joint" type="fixed">
+		<parent link="leg2"/>
+		<child link="leg2lowerLeftConner"/>
+		<origin rpy="0 0 0" xyz="-0.038442059036156634 -0.0245 0"/>
+	</joint>
+	<link name="leg2lowerRightConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Green"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg2lowerRightConner_joint" type="fixed">
+		<parent link="leg2"/>
+		<child link="leg2lowerRightConner"/>
+		<origin rpy="0 0 0" xyz="-0.038442059036156634 0.0245 0"/>
+	</joint>
+	<link name="leg2topLeftConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Green"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg2topLeftConner_joint" type="fixed">
+		<parent link="leg2top"/>
+		<child link="leg2topLeftConner"/>
+		<origin rpy="0 0 0" xyz="0.02055794096384336 -0.0245 0"/>
+	</joint>
+	<link name="leg2topRightConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Green"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg2topRightConner_joint" type="fixed">
+		<parent link="leg2top"/>
+		<child link="leg2topRightConner"/>
+		<origin rpy="0 0 0" xyz="0.02055794096384336 0.0245 0"/>
+	</joint>
+	<link name="leg3lowerLeftConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Blue"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg3lowerLeftConner_joint" type="fixed">
+		<parent link="leg3"/>
+		<child link="leg3lowerLeftConner"/>
+		<origin rpy="0 0 0" xyz="-0.038442059036156634 -0.0245 0"/>
+	</joint>
+	<link name="leg3lowerRightConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Blue"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg3lowerRightConner_joint" type="fixed">
+		<parent link="leg3"/>
+		<child link="leg3lowerRightConner"/>
+		<origin rpy="0 0 0" xyz="-0.038442059036156634 0.0245 0"/>
+	</joint>
+	<link name="leg3topLeftConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Blue"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg3topLeftConner_joint" type="fixed">
+		<parent link="leg3top"/>
+		<child link="leg3topLeftConner"/>
+		<origin rpy="0 0 0" xyz="0.02055794096384336 -0.0245 0"/>
+	</joint>
+	<link name="leg3topRightConner">
+		<visual>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+
+			<material name="Blue"/>
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.001"/>
+			</geometry>
+		</collision>
+	</link>
+
+	<joint name="leg3topRightConner_joint" type="fixed">
+		<parent link="leg3top"/>
+		<child link="leg3topRightConner"/>
+		<origin rpy="0 0 0" xyz="0.02055794096384336 0.0245 0"/>
+	</joint>
 
 </robot>

@@ -15,7 +15,6 @@ Once mc_rtc is installed, clone this repository into a folder called `catkin_dat
 
 ```
 git clone git@github.com:anastasiabolotnikova/robogami_description.git
-
 ```
 
 ### Build

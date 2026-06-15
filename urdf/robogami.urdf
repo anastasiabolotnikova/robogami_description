@@ -1,0 +1,244 @@
+<?xml version="1.0" ?>
+<robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">
+	<material name="Gray">
+		<color rgba="0.1 0.1 0.1 1.0"/>
+	</material>
+
+	<link name="base">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/base.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<link name="leg1">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<link name="leg2">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<link name="leg3">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<joint name="l1" type="revolute">
+		<parent link="base"/>
+		<child link="leg1"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0" upper="1.4" velocity="1"/>
+		<origin rpy="0 0 0" xyz="-0.05629165124598851 0 0"/>
+	</joint>
+
+	<joint name="l2" type="revolute">
+		<parent link="base"/>
+		<child link="leg2"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0" upper="1.4" velocity="1"/>
+		<origin rpy="0 0 2.0943951023931953" xyz="0.028145825622994256 -0.04875 0"/>
+	</joint>
+
+	<joint name="l3" type="revolute">
+		<parent link="base"/>
+		<child link="leg3"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0" upper="1.4" velocity="1"/>
+		<origin rpy="0 0 -2.0943951023931953" xyz="0.028145825622994256 0.04875 0"/>
+	</joint>
+
+	<link name="leg1top">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0.059 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<link name="leg2top">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0.059 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<link name="leg3top">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="0.059 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<link name="l1RotX"/>
+
+	<link name="l1RotY"/>
+
+	<joint name="x_l1rotx" type="revolute">
+		<parent link="leg1"/>
+		<child link="l1RotX"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 3.141592653589793 0" xyz="-0.059 0 0"/>
+	</joint>
+
+	<joint name="x_l1roty" type="revolute">
+		<parent link="l1RotX"/>
+		<child link="l1RotY"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0.1" upper="3.13" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
+
+	<joint name="x_l1top" type="revolute">
+		<parent link="l1RotY"/>
+		<child link="leg1top"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
+
+	<link name="l2RotX"/>
+
+	<link name="l2RotY"/>
+
+	<joint name="x_l2rotx" type="revolute">
+		<parent link="leg2"/>
+		<child link="l2RotX"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 3.141592653589793 0" xyz="-0.059 0 0"/>
+	</joint>
+
+	<joint name="x_l2roty" type="revolute">
+		<parent link="l2RotX"/>
+		<child link="l2RotY"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0.1" upper="3.13" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
+
+	<joint name="x_l2top" type="revolute">
+		<parent link="l2RotY"/>
+		<child link="leg2top"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
+
+	<link name="l3RotX"/>
+
+	<link name="l3RotY"/>
+
+	<joint name="x_l3rotx" type="revolute">
+		<parent link="leg3"/>
+		<child link="l3RotX"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 3.141592653589793 0" xyz="-0.059 0 0"/>
+	</joint>
+
+	<joint name="x_l3roty" type="revolute">
+		<parent link="l3RotX"/>
+		<child link="l3RotY"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0.1" upper="3.13" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
+
+	<joint name="x_l3top" type="revolute">
+		<parent link="l3RotY"/>
+		<child link="leg3top"/>
+		<axis xyz="1 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint>
+
+	<link name="top">
+		<inertial>
+			<mass value="0.01" />
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+		</inertial>
+		<visual>
+			<origin rpy="0 0 0" xyz="-0.05629165124598851 0 0"/>
+			<geometry>
+				<mesh filename="package://robogami_description/meshes/base.stl"/>
+			</geometry>
+			<material name="Gray"/>
+		</visual>
+	</link>
+
+	<joint name="l1topBase" type="revolute">
+		<parent link="leg1top"/>
+		<child link="top"/>
+		<axis xyz="0 1 0"/>
+		<limit effort="1" lower="0" upper="1.56" velocity="1"/>
+		<origin rpy="0 3.141592653589793 0" xyz="0.059 0 0"/>
+	</joint>
+
+
+</robot>

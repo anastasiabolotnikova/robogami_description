@@ -1,0 +1,6 @@
+hexagon_side: 0.1 #m
+hexagon_thickness: 0.002 #m
+leg_length: 0.06 #m
+leg_width: 0.05 #m 
+leg_angle: 50 #deg
+leg_thickness: 0.002 #m

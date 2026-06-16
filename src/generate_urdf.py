@@ -274,3 +274,4 @@ urdf.write(generate_corner_collision_links("leg3topRightConner", "leg3top", [sid
 # Done!
 urdf.write('\n</robot>')
 urdf.close()
+print("New Robogami URDF file using dimensions from "+config_file+" successfully generated: urdf/"+urdf_file)

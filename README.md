@@ -47,3 +47,4 @@ To control a Robogami module with dimensions different from the ones indicated i
 1. Run the [URDF generating script](src/generate_urdf.py) 
 `python generate_urdf.py ../etc/robogami_config_custom.yaml`
 1. (Recommended) See how it worked out: `ros2 launch robogami_description show_urdf.py urdf_file:=/urdf/robogami_custom.urdf`
+1. Rebuild ROS2 workspace to install new robot description `colcon build`

@@ -275,3 +275,28 @@ urdf.write(generate_corner_collision_links("leg3topRightConner", "leg3top", [sid
 urdf.write('\n</robot>')
 urdf.close()
 print("New Robogami URDF file using dimensions from "+config_file+" successfully generated: urdf/"+urdf_file)
+
+# Contact surface string generating function
+def generate_contact_surfaces(parent_link, surface, origin):
+    return "\n".join([
+        '\t<planar_surface name="{}" link="{}">'.format(surface, parent_link),
+        '\t\t<origin xyz="{} {} {}" rpy="0 0 0" />'.format(*origin),
+        '\t\t<points>',
+        '\t\t\t<point xy="0 0" />',
+        '\t\t</points>',
+        '\t\t<material name="plastic" />',
+        '\t</planar_surface>\n\n',
+    ])
+
+# RSDF file start
+rsdf = open("../rsdf/robogami/{}.rsdf".format("base"), "w")
+rsdf.write('<robot name="robogami">\n\n')
+
+# Planar surfaces
+rsdf.write(generate_contact_surfaces("top", "TopLeg2", [(base_a/4.0*sqrt(3)) - base_a*sqrt(3), -3.0*base_a/4.0, 0]))
+rsdf.write(generate_contact_surfaces("top", "TopLeg3", [(base_a/4.0*sqrt(3)) - base_a*sqrt(3), 3.0*base_a/4.0, 0]))
+rsdf.write(generate_contact_surfaces("leg2TopMove", "Leg2", [0, 0, 0]))
+
+# RSDF file end
+rsdf.write('</robot>')
+rsdf.close()

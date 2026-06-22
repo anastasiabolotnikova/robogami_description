@@ -1,15 +1,15 @@
 <robot name="robogami">
 
-	<planar_surface name="TopLeg2" link="top">
-		<origin xyz="-0.08443747686898277 -0.04875 0" rpy="0 0 0" />
+	<planar_surface name="TopLeg2" link="topleg2">
+		<origin xyz="0 0 0 " rpy="0 0 0" />
 		<points>
 			<point xy="0 0" />
 		</points>
 		<material name="plastic" />
 	</planar_surface>
 
-	<planar_surface name="TopLeg3" link="top">
-		<origin xyz="-0.08443747686898277 0.04875 0" rpy="0 0 0" />
+	<planar_surface name="TopLeg3" link="topleg3">
+		<origin xyz="0 0 0 " rpy="0 0 0" />
 		<points>
 			<point xy="0 0" />
 		</points>
@@ -17,7 +17,15 @@
 	</planar_surface>
 
 	<planar_surface name="Leg2" link="leg2TopMove">
-		<origin xyz="0 0 0" rpy="0 0 0" />
+		<origin xyz="0 0 0 " rpy="0 0 0" />
+		<points>
+			<point xy="0 0" />
+		</points>
+		<material name="plastic" />
+	</planar_surface>
+
+	<planar_surface name="Leg3" link="leg3TopMove">
+		<origin xyz="0 0 0 " rpy="0 0 0" />
 		<points>
 			<point xy="0 0" />
 		</points>

@@ -106,15 +106,6 @@ side_faces = np.array([[0,1,3], [1,2,3], [1,5,2], [5,6,2], [5,4,7], [5,7,6], [4,
 save_stl(base_vertices, base_faces, '../meshes/base.stl')
 save_stl(side_vertices, side_faces, '../meshes/leg.stl')
 
-# Write the URDF file (define links and joints)
-suffix = Path(config_file).stem.replace("robogami_config_", "", 1)
-urdf_file = "robogami.urdf" if suffix == "baseline" else f"robogami_{suffix}.urdf"
-urdf = open("../urdf/"+urdf_file, "w")
-
-# URDF general info
-urdf.write('<?xml version="1.0" ?>\n')
-urdf.write('<robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">\n\n')
-
 # Link materials genersting function (for visualization/debugging)
 def generate_urdf_material_color(name, rgbs):
     r, g, b, a = rgbs
@@ -204,10 +195,42 @@ def generate_corner_collision_links(link_name, parent_link, joint_origin, materi
         '\t\t<parent link="{}"/>'.format(parent_link),
         '\t\t<child link="{}"/>'.format(link_name),
         '\t\t<origin rpy="0 0 0" xyz="{} {} {}"/>'.format(*joint_origin),
-        '\t</joint>\n'
+        '\t</joint>\n\n'
     ])
 
+def generate_fixed_joint_link(link_name, joint_name, parent_link, joint_origin):
+    return "\n".join([
+        '\t<link name="{}"/>\n\n'.format(link_name),
+        '\t<joint name="{}" type="fixed">'.format(joint_name),
+		'\t\t<parent link="{}"/>'.format(parent_link),
+		'\t\t<child link="{}"/>'.format(link_name),
+		'\t\t<origin rpy="{} {} {}" xyz="{} {} {}"/>'.format(*joint_origin),
+	    '\t</joint>\n\n'
+    ])
+
+# Contact surface string generating function
+def generate_contact_surfaces(parent_link, surface):
+    return "\n".join([
+        '\t<planar_surface name="{}" link="{}">'.format(surface, parent_link),
+        '\t\t<origin xyz="0 0 0 " rpy="0 0 0" />',
+        '\t\t<points>',
+        '\t\t\t<point xy="0 0" />',
+        '\t\t</points>',
+        '\t\t<material name="plastic" />',
+        '\t</planar_surface>\n\n',
+    ])
+
+# Write the URDF file (define links and joints)
+suffix = Path(config_file).stem.replace("robogami_config_", "", 1)
+urdf_file = "robogami.urdf" if suffix == "baseline" else f"robogami_{suffix}.urdf"
+urdf = open("../urdf/"+urdf_file, "w")
+
+# URDF general info
+urdf.write('<?xml version="1.0" ?>\n')
+urdf.write('<robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">\n\n')
+
 # Materials
+urdf.write('\n\t<!-- Materials -->\n')
 urdf.write(generate_urdf_material_color("Gray", (0.1, 0.1, 0.1, 0.7)))
 urdf.write(generate_urdf_material_color("Red", (1, 0, 0, 1.0)))
 urdf.write(generate_urdf_material_color("Green", (0, 1, 0, 1.0)))
@@ -249,12 +272,14 @@ urdf.write(generate_link_urdf_str("top", "base", -base_r))
 urdf.write('\n\t<!-- Leg1 joint to top hexagon link -->\n')
 urdf.write(generate_joint_urdf_str("l1topBase", "leg1top", "top", 0, 1.56, "0 1 0", [0, radians(180.0), 0], [side_H, 0, 0]))
 
-# Two extra virtual links and associalted joints for defining closed chains
-urdf.write('\n\t<!-- Two extra virtual links and associalted joints for defining closed chains -->\n')
+# Auxiliary virtual links and associalted joints for defining contact surfaces and closed chains
+urdf.write('\n\t<!-- Auxiliary virtual links and associalted joints for defining contact surfaces and closed chains -->\n')
 urdf.write('\t<link name="leg2TopMove"/>\n\n')
 urdf.write('\t<link name="leg3TopMove"/>\n\n')
-urdf.write(generate_joint_urdf_str("l2TopMove", "leg2top", "leg2TopMove", 0, 1.56, "0 1 0", [0, 0, 0], [side_H, 0, 0]))
-urdf.write(generate_joint_urdf_str("l3TopMove", "leg3top", "leg3TopMove", 0, 1.56, "0 1 0", [0, 0, 0], [side_H, 0, 0]))
+urdf.write(generate_joint_urdf_str("l2TopMove", "leg2top", "leg2TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0]))
+urdf.write(generate_joint_urdf_str("l3TopMove", "leg3top", "leg3TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0]))
+urdf.write(generate_fixed_joint_link("topleg2", "topleg2", "top", [0, radians(90.0), radians(-120.0), (base_a/4.0*sqrt(3)) - base_a*sqrt(3), -3.0*base_a/4.0, 0]))
+urdf.write(generate_fixed_joint_link("topleg3", "topleg3", "top", [0, radians(90.0), radians(120.0), (base_a/4.0*sqrt(3)) - base_a*sqrt(3), 3.0*base_a/4.0, 0]))
 
 # Corner collision links
 urdf.write('\n\t<!-- Corner collision shapes -->\n')
@@ -276,26 +301,16 @@ urdf.write('\n</robot>')
 urdf.close()
 print("New Robogami URDF file using dimensions from "+config_file+" successfully generated: urdf/"+urdf_file)
 
-# Contact surface string generating function
-def generate_contact_surfaces(parent_link, surface, origin):
-    return "\n".join([
-        '\t<planar_surface name="{}" link="{}">'.format(surface, parent_link),
-        '\t\t<origin xyz="{} {} {}" rpy="0 0 0" />'.format(*origin),
-        '\t\t<points>',
-        '\t\t\t<point xy="0 0" />',
-        '\t\t</points>',
-        '\t\t<material name="plastic" />',
-        '\t</planar_surface>\n\n',
-    ])
-
 # RSDF file start
-rsdf = open("../rsdf/robogami/{}.rsdf".format("base"), "w")
+rsdf_folder = "robogami" if suffix == "baseline" else f"robogami_{suffix}.urdf"
+rsdf = open("../rsdf/{}/{}.rsdf".format(rsdf_folder, "base"), "w")
 rsdf.write('<robot name="robogami">\n\n')
 
 # Planar surfaces
-rsdf.write(generate_contact_surfaces("top", "TopLeg2", [(base_a/4.0*sqrt(3)) - base_a*sqrt(3), -3.0*base_a/4.0, 0]))
-rsdf.write(generate_contact_surfaces("top", "TopLeg3", [(base_a/4.0*sqrt(3)) - base_a*sqrt(3), 3.0*base_a/4.0, 0]))
-rsdf.write(generate_contact_surfaces("leg2TopMove", "Leg2", [0, 0, 0]))
+rsdf.write(generate_contact_surfaces("topleg2", "TopLeg2"))
+rsdf.write(generate_contact_surfaces("topleg3", "TopLeg3"))
+rsdf.write(generate_contact_surfaces("leg2TopMove", "Leg2"))
+rsdf.write(generate_contact_surfaces("leg3TopMove", "Leg3"))
 
 # RSDF file end
 rsdf.write('</robot>')

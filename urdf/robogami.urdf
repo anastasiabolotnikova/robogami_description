@@ -1,6 +1,8 @@
 <?xml version="1.0" ?>
 <robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+
+	<!-- Materials -->
 	<material name="Gray">
 		<color rgba="0.1 0.1 0.1 0.7"/>
 	</material>
@@ -264,7 +266,7 @@
 	</joint>
 
 
-	<!-- Two extra virtual links and associalted joints for defining closed chains -->
+	<!-- Auxiliary virtual links and associalted joints for defining contact surfaces and closed chains -->
 	<link name="leg2TopMove"/>
 
 	<link name="leg3TopMove"/>
@@ -273,16 +275,34 @@
 		<parent link="leg2top"/>
 		<child link="leg2TopMove"/>
 		<axis xyz="0 1 0"/>
-		<limit effort="1" lower="0" upper="1.56" velocity="1"/>
-		<origin rpy="0 0 0" xyz="0.059 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 -1.5707963267948966 0" xyz="0.059 0 0"/>
 	</joint>
 
 	<joint name="l3TopMove" type="revolute">
 		<parent link="leg3top"/>
 		<child link="leg3TopMove"/>
 		<axis xyz="0 1 0"/>
-		<limit effort="1" lower="0" upper="1.56" velocity="1"/>
-		<origin rpy="0 0 0" xyz="0.059 0 0"/>
+		<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>
+		<origin rpy="0 -1.5707963267948966 0" xyz="0.059 0 0"/>
+	</joint>
+
+	<link name="topleg2"/>
+
+
+	<joint name="topleg2" type="fixed">
+		<parent link="top"/>
+		<child link="topleg2"/>
+		<origin rpy="0 1.5707963267948966 -2.0943951023931953" xyz="-0.08443747686898277 -0.04875 0"/>
+	</joint>
+
+	<link name="topleg3"/>
+
+
+	<joint name="topleg3" type="fixed">
+		<parent link="top"/>
+		<child link="topleg3"/>
+		<origin rpy="0 1.5707963267948966 2.0943951023931953" xyz="-0.08443747686898277 0.04875 0"/>
 	</joint>
 
 
@@ -307,6 +327,7 @@
 		<child link="leg1lowerLeftConner"/>
 		<origin rpy="0 0 0" xyz="-0.038442059036156634 -0.0245 0"/>
 	</joint>
+
 	<link name="leg1lowerRightConner">
 		<visual>
 			<geometry>
@@ -327,6 +348,7 @@
 		<child link="leg1lowerRightConner"/>
 		<origin rpy="0 0 0" xyz="-0.038442059036156634 0.0245 0"/>
 	</joint>
+
 	<link name="leg1topLeftConner">
 		<visual>
 			<geometry>
@@ -347,6 +369,7 @@
 		<child link="leg1topLeftConner"/>
 		<origin rpy="0 0 0" xyz="0.02055794096384336 -0.0245 0"/>
 	</joint>
+
 	<link name="leg1topRightConner">
 		<visual>
 			<geometry>
@@ -367,6 +390,7 @@
 		<child link="leg1topRightConner"/>
 		<origin rpy="0 0 0" xyz="0.02055794096384336 0.0245 0"/>
 	</joint>
+
 	<link name="leg2lowerLeftConner">
 		<visual>
 			<geometry>
@@ -387,6 +411,7 @@
 		<child link="leg2lowerLeftConner"/>
 		<origin rpy="0 0 0" xyz="-0.038442059036156634 -0.0245 0"/>
 	</joint>
+
 	<link name="leg2lowerRightConner">
 		<visual>
 			<geometry>
@@ -407,6 +432,7 @@
 		<child link="leg2lowerRightConner"/>
 		<origin rpy="0 0 0" xyz="-0.038442059036156634 0.0245 0"/>
 	</joint>
+
 	<link name="leg2topLeftConner">
 		<visual>
 			<geometry>
@@ -427,6 +453,7 @@
 		<child link="leg2topLeftConner"/>
 		<origin rpy="0 0 0" xyz="0.02055794096384336 -0.0245 0"/>
 	</joint>
+
 	<link name="leg2topRightConner">
 		<visual>
 			<geometry>
@@ -447,6 +474,7 @@
 		<child link="leg2topRightConner"/>
 		<origin rpy="0 0 0" xyz="0.02055794096384336 0.0245 0"/>
 	</joint>
+
 	<link name="leg3lowerLeftConner">
 		<visual>
 			<geometry>
@@ -467,6 +495,7 @@
 		<child link="leg3lowerLeftConner"/>
 		<origin rpy="0 0 0" xyz="-0.038442059036156634 -0.0245 0"/>
 	</joint>
+
 	<link name="leg3lowerRightConner">
 		<visual>
 			<geometry>
@@ -487,6 +516,7 @@
 		<child link="leg3lowerRightConner"/>
 		<origin rpy="0 0 0" xyz="-0.038442059036156634 0.0245 0"/>
 	</joint>
+
 	<link name="leg3topLeftConner">
 		<visual>
 			<geometry>
@@ -507,6 +537,7 @@
 		<child link="leg3topLeftConner"/>
 		<origin rpy="0 0 0" xyz="0.02055794096384336 -0.0245 0"/>
 	</joint>
+
 	<link name="leg3topRightConner">
 		<visual>
 			<geometry>
@@ -527,5 +558,6 @@
 		<child link="leg3topRightConner"/>
 		<origin rpy="0 0 0" xyz="0.02055794096384336 0.0245 0"/>
 	</joint>
+
 
 </robot>

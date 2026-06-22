@@ -5,7 +5,7 @@ This package contains the robot description for the Robogami robot.
 
 It is an essential software component to use Robogami with [mc_rtc](https://jrl-umi3218.github.io/mc_rtc/) control framework.
 
-## Usage
+## Instructions
 
 First follow the [mc_rtc instalation instructions](https://jrl.cnrs.fr/mc_rtc/tutorials/introduction/installation-guide.html).
 
@@ -38,6 +38,12 @@ ros2 launch robogami_description show_urdf.py
 ```
 
 ![rviz](doc/rviz.png)
+
+### Use
+
+Install a robot module [mc_robogami](https://github.com/anastasiabolotnikova/mc_robogami)
+
+This will allow to use this robot description within an mc_rtc controller, such as [robogami_controller](https://github.com/anastasiabolotnikova/robogami_controller)
 
 ## Generate custom Robogami description
 

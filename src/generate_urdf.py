@@ -307,6 +307,7 @@ rsdf = open("../rsdf/{}/{}.rsdf".format(rsdf_folder, "base"), "w")
 rsdf.write('<robot name="robogami">\n\n')
 
 # Planar surfaces
+rsdf.write(generate_contact_surfaces("base", "Base"))
 rsdf.write(generate_contact_surfaces("topleg2", "TopLeg2"))
 rsdf.write(generate_contact_surfaces("topleg3", "TopLeg3"))
 rsdf.write(generate_contact_surfaces("leg2TopMove", "Leg2"))

@@ -8,6 +8,14 @@
 		<material name="plastic" />
 	</planar_surface>
 
+	<planar_surface name="Top" link="topCenter">
+		<origin xyz="0 0 0 " rpy="0 0 0" />
+		<points>
+			<point xy="0 0" />
+		</points>
+		<material name="plastic" />
+	</planar_surface>
+
 	<planar_surface name="TopLeg2" link="topleg2">
 		<origin xyz="0 0 0 " rpy="0 0 0" />
 		<points>

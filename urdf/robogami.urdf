@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-
 	<!-- Materials -->
 	<material name="Gray">
 		<color rgba="0.1 0.1 0.1 0.7"/>
@@ -31,7 +30,6 @@
 			<material name="Gray"/>
 		</visual>
 	</link>
-
 
 	<!-- Legs lower links -->
 	<link name="leg1">
@@ -79,7 +77,6 @@
 		</visual>
 	</link>
 
-
 	<!-- Joints connecting leg lower links to the hexagon base link -->
 	<joint name="l1" type="revolute">
 		<parent link="base"/>
@@ -104,7 +101,6 @@
 		<limit effort="1" lower="0" upper="1.4" velocity="1"/>
 		<origin rpy="0 0 -2.0943951023931953" xyz="0.028145825622994256 0.04875 0"/>
 	</joint>
-
 
 	<!-- Legs upper links -->
 	<link name="leg1top">
@@ -151,7 +147,6 @@
 			<material name="Gray"/>
 		</visual>
 	</link>
-
 
 	<!-- Spherical joints connecting leg lower and upper links -->
 	<link name="l1RotX"/>
@@ -238,7 +233,6 @@
 		<origin rpy="0 0 0" xyz="0 0 0"/>
 	</joint>
 
-
 	<!-- Top hexagon link -->
 	<link name="top">
 		<inertial>
@@ -255,7 +249,6 @@
 		</visual>
 	</link>
 
-
 	<!-- Leg1 joint to top hexagon link -->
 	<joint name="l1topBase" type="revolute">
 		<parent link="leg1top"/>
@@ -264,7 +257,6 @@
 		<limit effort="1" lower="0" upper="1.56" velocity="1"/>
 		<origin rpy="0 3.141592653589793 0" xyz="0.059 0 0"/>
 	</joint>
-
 
 	<!-- Auxiliary virtual links and associalted joints for defining contact surfaces and closed chains -->
 	<link name="leg2TopMove"/>
@@ -287,8 +279,15 @@
 		<origin rpy="0 -1.5707963267948966 0" xyz="0.059 0 0"/>
 	</joint>
 
-	<link name="topleg2"/>
+	<link name="topCenter"/>
 
+	<joint name="topCenter" type="fixed">
+		<parent link="top"/>
+		<child link="topCenter"/>
+		<origin rpy="0 3.141592653589793 0" xyz="-0.05629165124598851 0 0"/>
+	</joint>
+
+	<link name="topleg2"/>
 
 	<joint name="topleg2" type="fixed">
 		<parent link="top"/>
@@ -298,13 +297,11 @@
 
 	<link name="topleg3"/>
 
-
 	<joint name="topleg3" type="fixed">
 		<parent link="top"/>
 		<child link="topleg3"/>
 		<origin rpy="0 1.5707963267948966 2.0943951023931953" xyz="-0.08443747686898277 0.04875 0"/>
 	</joint>
-
 
 	<!-- Corner collision shapes -->
 	<link name="leg1lowerLeftConner">

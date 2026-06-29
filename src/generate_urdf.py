@@ -1,5 +1,7 @@
 import sys
 import yaml
+import shutil
+import subprocess
 import numpy as np
 from pathlib import Path
 
@@ -222,8 +224,8 @@ def generate_contact_surface(parent_link, surface):
 
 # Write the URDF file (define links and joints)
 suffix = Path(config_file).stem.replace("robogami_config_", "", 1)
-urdf_file = "robogami.urdf" if suffix == "baseline" else f"robogami_{suffix}.urdf"
-urdf = open("../urdf/"+urdf_file, "w")
+robot = "robogami" if suffix == "baseline" else f"robogami_{suffix}"
+urdf = open("../urdf/"+robot+".urdf", "w")
 
 # URDF general info
 urdf.write('<?xml version="1.0" ?>\n')
@@ -300,11 +302,10 @@ urdf.write(generate_corner_collision_links("leg3topRightConner", "leg3top", [sid
 # Done!
 urdf.write('\n</robot>')
 urdf.close()
-print("New Robogami URDF file using dimensions from "+config_file+" successfully generated: urdf/"+urdf_file)
+print("New Robogami URDF file using dimensions from "+config_file+" successfully generated")
 
 # RSDF file start
-rsdf_folder = "robogami" if suffix == "baseline" else f"robogami_{suffix}.urdf"
-rsdf = open("../rsdf/{}/{}.rsdf".format(rsdf_folder, "base"), "w")
+rsdf = open("../rsdf/{}/{}.rsdf".format(robot, "base"), "w")
 rsdf.write('<robot name="robogami">\n\n')
 
 # Planar surfaces
@@ -318,3 +319,41 @@ rsdf.write(generate_contact_surface("leg3TopMove", "Leg3"))
 # RSDF file end
 rsdf.write('</robot>')
 rsdf.close()
+
+# Collision shapes generation
+## Generate cloud files
+convex_folder = f"../convex/{robot}/"
+base_cloud = "base.qc"
+base_cloud_file = open(convex_folder+base_cloud, "w")
+base_cloud_file.write("3\n") # 3D space
+base_cloud_file.write("12\n") # 12 points
+for p in base_vertices:
+    base_cloud_file.write(f"{p[0]} {p[1]} {p[2]}\n")
+base_cloud_file.close()
+
+leg_cloud = "leg.qc"
+leg_cloud_file = open(convex_folder+leg_cloud, "w")
+leg_cloud_file.write("3\n") # 3D space
+leg_cloud_file.write("10\n") # 10 points
+for p in side_vertices:
+    leg_cloud_file.write(f"{p[0]} {p[1]} {p[2]}\n")
+leg_cloud_file.close()
+
+# Generate convex collision hull files from the cloud files
+subprocess.run(["qconvex", "TI", convex_folder+base_cloud, "TO", convex_folder+"base-ch.txt", "Qt", "o", "f",], check=True)
+
+subprocess.run(["qconvex", "TI", convex_folder+leg_cloud, "TO", convex_folder+"leg1-ch.txt", "Qt", "o", "f",], check=True)
+
+# Make files for every robot link
+shutil.copy(f"../convex/{convex_folder}/base-ch.txt", f"../convex/{convex_folder}/top-ch.txt")
+shutil.copy(f"../convex/{convex_folder}/leg1-ch.txt", f"../convex/{convex_folder}/leg2-ch.txt")
+shutil.copy(f"../convex/{convex_folder}/leg1-ch.txt", f"../convex/{convex_folder}/leg3-ch.txt")
+shutil.copy(f"../convex/{convex_folder}/leg1-ch.txt", f"../convex/{convex_folder}/leg1top-ch.txt")
+shutil.copy(f"../convex/{convex_folder}/leg1-ch.txt", f"../convex/{convex_folder}/leg2top-ch.txt")
+shutil.copy(f"../convex/{convex_folder}/leg1-ch.txt", f"../convex/{convex_folder}/leg3top-ch.txt")
+
+# Remove the cloud files
+file = Path(convex_folder+base_cloud)
+if file.exists(): file.unlink()
+file = Path(convex_folder+leg_cloud)
+if file.exists(): file.unlink()

@@ -9,6 +9,10 @@ It is an essential software component to use Robogami with [mc_rtc](https://jrl-
 
 First follow the [mc_rtc instalation instructions](https://jrl.cnrs.fr/mc_rtc/tutorials/introduction/installation-guide.html).
 
+Also install `qhull` for generating convex collision shapes:
+
+```sudo apt install qhull-bin```
+
 ### Clone
 
 Once mc_rtc is installed, clone this repository into a folder called `catkin_data_ws/src/mc_rtc_data/`

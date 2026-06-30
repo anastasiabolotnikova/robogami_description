@@ -1,7 +1,7 @@
 Robogami description package
 ================
 
-This package contains the robot description for the Robogami robot.
+This package contains the robot description for the Robogami: origami-inspired closed-chain modular robot.
 
 It is an essential software component to use Robogami with [mc_rtc](https://jrl-umi3218.github.io/mc_rtc/) control framework.
 

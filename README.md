@@ -18,7 +18,7 @@ Also install `qhull` for generating convex collision shapes:
 Once mc_rtc is installed, clone this repository into a folder called `catkin_data_ws/src/mc_rtc_data/`
 
 ```
-git clone git@github.com:anastasiabolotnikova/robogami_description.git
+git clone https://github.com/anastasiabolotnikova/robogami_description
 ```
 
 ### Build

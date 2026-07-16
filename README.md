@@ -37,9 +37,18 @@ colcon build --merge-install
 
 ### Visualize
 
+Install `joint-state-publisher-gui`
+
+```
+sudo apt update
+sudo apt install ros-jazzy-joint-state-publisher-gui
+```
+
 ```
 ros2 launch robogami_description show_urdf.py
 ```
+
+In RViz `Displays` panel make sure that `Fixed Frame` is set to `base`. Add `RobotModel` to the list of RViz `Displays` and set its `Description Topic` to `/robot_description`.
 
 ![rviz](doc/rviz.png)
 

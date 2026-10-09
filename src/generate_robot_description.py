@@ -330,6 +330,7 @@ urdf.close()
 print("New Robogami URDF file using dimensions from "+config_file+" successfully generated")
 
 # RSDF file start
+Path("../rsdf/{}".format(robot)).mkdir(parents=True, exist_ok=True)
 rsdf = open("../rsdf/{}/{}.rsdf".format(robot, "base"), "w")
 rsdf.write('<robot name="robogami">\n\n')
 
@@ -348,6 +349,7 @@ rsdf.close()
 # Collision shapes generation
 ## Generate cloud files
 convex_folder = f"../convex/{robot}/"
+Path(convex_folder).mkdir(parents=True, exist_ok=True)
 base_cloud = "base.qc"
 base_cloud_file = open(convex_folder+base_cloud, "w")
 base_cloud_file.write("3\n") # 3D space

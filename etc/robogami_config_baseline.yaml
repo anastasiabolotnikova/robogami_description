@@ -6,3 +6,7 @@ leg_angle: 40 #deg
 leg_thickness: 0.001 #m
 density: 1.25 #g/cm^3
 motor_mass: 65 #g
+motor_torque_limit: 1 #Nm, l1/l2/l3 motor limit
+motor_speed_limit: 1 #rad/s
+unactuated_joint_torque_limit: 1 #Nm, unactuated joint limit
+unactuated_joint_speed_limit: 1 #rad/s

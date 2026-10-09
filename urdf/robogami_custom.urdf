@@ -8,6 +8,10 @@
 	leg_thickness=0.002
 	density=1.25
 	motor_mass=65
+	motor_torque_limit=1
+	motor_speed_limit=1
+	unactuated_joint_torque_limit=1
+	unactuated_joint_speed_limit=1
 -->
 <robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">
 

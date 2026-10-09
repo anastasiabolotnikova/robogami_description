@@ -82,21 +82,20 @@ config_file = sys.argv[1]
 with open(config_file, "r") as f:
     data = yaml.safe_load(f)
 
-# Robot/mesh name for this config, e.g. "robogami" (baseline) or
-# "robogami_custom". Meshes are namespaced by it so that regenerating one
-# config's URDF cannot silently overwrite the mesh files another config's
-# already-generated URDF still refers to.
+# Robot/mesh name for the given config
 suffix = Path(config_file).stem.replace("robogami_config_", "", 1)
 robot = "robogami" if suffix == "baseline" else f"robogami_{suffix}"
 
 # Load variables
-vars_to_import = ['hexagon_side', 'hexagon_thickness', 'leg_width', 'leg_length', 'leg_angle', 'leg_thickness', 'density', 'motor_mass']
+vars_to_import = ['hexagon_side', 'hexagon_thickness', 'leg_width', 'leg_length', 'leg_angle', 'leg_thickness', 'density', 'motor_mass',
+                  'motor_torque_limit', 'motor_speed_limit', 'unactuated_joint_torque_limit', 'unactuated_joint_speed_limit']
 missing = [v for v in vars_to_import if v not in data]
 if missing:
     raise KeyError(f"Missing keys in YAML config file: {missing}")
-base_a, base_t, side_a, side_H, side_ang, side_c, density_g_cm3, motor_mass_g = (data[v] for v in vars_to_import)
-density = density_g_cm3 * 1000.0 # convert g/cm^3 to kg/m^3
-motor_mass = motor_mass_g / 1000.0 # convert g to kg
+(base_a, base_t, side_a, side_H, side_ang, side_c, density_g_cm3, motor_mass_g,
+ motor_torque_limit, motor_speed_limit, unactuated_joint_torque_limit, unactuated_joint_speed_limit) = (data[v] for v in vars_to_import)
+density = density_g_cm3 * 1000.0 # g/cm^3 to kg/m^3
+motor_mass = motor_mass_g / 1000.0 # g to kg
 
 # Compute auxiliary dimensions
 side_h = (side_a / 2.0) * tan(radians(side_ang))
@@ -202,13 +201,13 @@ def generate_link_urdf_str(link_name, mesh_name, mass, cog, inertia, offset=0):
     ])
     
 # Joint URDF string generating function
-def generate_joint_urdf_str(joint_name, parent_link, child_link, ll, ul, axis, rpy, xyz):
+def generate_joint_urdf_str(joint_name, parent_link, child_link, ll, ul, axis, rpy, xyz, effort, velocity):
     return "\n".join([
         '\t<joint name="{}" type="revolute">'.format(joint_name),
         '\t\t<parent link="{}"/>'.format(parent_link),
         '\t\t<child link="{}"/>'.format(child_link),
         '\t\t<axis xyz="{}"/>'.format(axis),
-        '\t\t<limit effort="1" lower="{}" upper="{}" velocity="1"/>'.format(str(ll), str(ul)), # TODO double check joint limits
+        '\t\t<limit effort="{}" lower="{}" upper="{}" velocity="{}"/>'.format(effort, str(ll), str(ul), velocity),
         '\t\t<origin rpy="{} {} {}" xyz="{} {} {}"/>'.format(*rpy, *xyz),
         '\t</joint>\n\n'
     ])
@@ -222,21 +221,21 @@ def generate_spherical_joint_urdf_str(parent_link, child_link, extra_link1, extr
         '\t\t<parent link="{}"/>'.format(parent_link),
         '\t\t<child link="{}"/>'.format(extra_link1),
         '\t\t<axis xyz="1 0 0"/>',
-        '\t\t<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>',
+        '\t\t<limit effort="{}" lower="-1.56" upper="1.56" velocity="{}"/>'.format(unactuated_joint_torque_limit, unactuated_joint_speed_limit),
         '\t\t<origin rpy="0 {} 0" xyz="{} 0 0"/>'.format(radians(180), -side_H),
         '\t</joint>\n',
         '\t<joint name="{}" type="revolute">'.format(extra_joint2), # Y rotation joint
         '\t\t<parent link="{}"/>'.format(extra_link1),
         '\t\t<child link="{}"/>'.format(extra_link2),
         '\t\t<axis xyz="0 1 0"/>',
-        '\t\t<limit effort="1" lower="0.1" upper="3.13" velocity="1"/>',
+        '\t\t<limit effort="{}" lower="0.1" upper="3.13" velocity="{}"/>'.format(unactuated_joint_torque_limit, unactuated_joint_speed_limit),
         '\t\t<origin rpy="0 0 0" xyz="0 0 0"/>',
         '\t</joint>\n',
         '\t<joint name="{}" type="revolute">'.format(extra_joint3), # Z ?? rotation joint
         '\t\t<parent link="{}"/>'.format(extra_link2),
         '\t\t<child link="{}"/>'.format(child_link),
         '\t\t<axis xyz="1 0 0"/>',
-        '\t\t<limit effort="1" lower="-1.56" upper="1.56" velocity="1"/>',
+        '\t\t<limit effort="{}" lower="-1.56" upper="1.56" velocity="{}"/>'.format(unactuated_joint_torque_limit, unactuated_joint_speed_limit),
         '\t\t<origin rpy="0 0 0" xyz="0 0 0"/>',
         '\t</joint>\n\n'
     ])
@@ -314,9 +313,9 @@ urdf.write(generate_link_urdf_str("leg3", leg_mesh_name, leg_mass, leg_cog, leg_
 
 # Joints connecting leg lower links to the hexagon base link (actuated DoFs)
 urdf.write('\t<!-- Joints connecting leg lower links to the hexagon base link -->\n')
-urdf.write(generate_joint_urdf_str("l1", "base", "leg1", 0, 1.4, "0 1 0", [0, 0, 0], leg_attachment_positions[0]))
-urdf.write(generate_joint_urdf_str("l2", "base", "leg2", 0, 1.4, "0 1 0", [0, 0, radians(120.0)], leg_attachment_positions[1]))
-urdf.write(generate_joint_urdf_str("l3", "base", "leg3", 0, 1.4, "0 1 0", [0, 0, radians(-120.0)], leg_attachment_positions[2]))
+urdf.write(generate_joint_urdf_str("l1", "base", "leg1", 0, 1.4, "0 1 0", [0, 0, 0], leg_attachment_positions[0], motor_torque_limit, motor_speed_limit))
+urdf.write(generate_joint_urdf_str("l2", "base", "leg2", 0, 1.4, "0 1 0", [0, 0, radians(120.0)], leg_attachment_positions[1], motor_torque_limit, motor_speed_limit))
+urdf.write(generate_joint_urdf_str("l3", "base", "leg3", 0, 1.4, "0 1 0", [0, 0, radians(-120.0)], leg_attachment_positions[2], motor_torque_limit, motor_speed_limit))
 
 # Legs upper links
 urdf.write('\t<!-- Legs upper links -->\n')
@@ -336,14 +335,14 @@ urdf.write(generate_link_urdf_str("top", base_mesh_name, base_mass, base_cog, ba
 
 # Leg1 joint to top hexagon link
 urdf.write('\t<!-- Leg1 joint to top hexagon link -->\n')
-urdf.write(generate_joint_urdf_str("l1topBase", "leg1top", "top", 0, 1.56, "0 1 0", [0, radians(180.0), 0], [side_H, 0, 0]))
+urdf.write(generate_joint_urdf_str("l1topBase", "leg1top", "top", 0, 1.56, "0 1 0", [0, radians(180.0), 0], [side_H, 0, 0], unactuated_joint_torque_limit, unactuated_joint_speed_limit))
 
 # Auxiliary virtual links and associalted joints for defining contact surfaces and closed chains
 urdf.write('\t<!-- Auxiliary virtual links and associalted joints for defining contact surfaces and closed chains -->\n')
 urdf.write('\t<link name="leg2TopMove"/>\n\n')
 urdf.write('\t<link name="leg3TopMove"/>\n\n')
-urdf.write(generate_joint_urdf_str("l2TopMove", "leg2top", "leg2TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0]))
-urdf.write(generate_joint_urdf_str("l3TopMove", "leg3top", "leg3TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0]))
+urdf.write(generate_joint_urdf_str("l2TopMove", "leg2top", "leg2TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0], unactuated_joint_torque_limit, unactuated_joint_speed_limit))
+urdf.write(generate_joint_urdf_str("l3TopMove", "leg3top", "leg3TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0], unactuated_joint_torque_limit, unactuated_joint_speed_limit))
 urdf.write(generate_fixed_joint_link("topCenter", "topCenter", "top", [0, radians(180.0), 0, -base_a*sqrt(3)/2.0, 0, 0]))
 urdf.write(generate_fixed_joint_link("topleg2", "topleg2", "top", [0, radians(90.0), radians(-120.0), (base_a/4.0*sqrt(3)) - base_a*sqrt(3), -3.0*base_a/4.0, 0]))
 urdf.write(generate_fixed_joint_link("topleg3", "topleg3", "top", [0, radians(90.0), radians(120.0), (base_a/4.0*sqrt(3)) - base_a*sqrt(3), 3.0*base_a/4.0, 0]))

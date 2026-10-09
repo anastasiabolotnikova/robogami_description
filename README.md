@@ -13,6 +13,10 @@ Also install `qhull` for generating convex collision shapes:
 
 ```sudo apt install qhull-bin```
 
+The [URDF generating script](src/generate_robot_description.py) needs a few Python packages, only required if you intend to (re)generate the URDF (e.g. for a [custom Robogami description](#generate-custom-robogami-description)):
+
+```pip install -r src/requirements.txt```
+
 ### Clone
 
 Once mc_rtc is installed, clone this repository into a folder called `catkin_data_ws/src/mc_rtc_data/`

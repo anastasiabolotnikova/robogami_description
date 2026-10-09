@@ -32,15 +32,24 @@ def plot_vertices_3d(side_vertices):
 
     plt.show()
 
+# Build a numpy-stl Mesh from a set of vertices/faces
+def build_mesh(vertices, faces):
+    m = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))
+
+    for i, f in enumerate(faces):
+        for j in range(3):
+            m.vectors[i][j] = vertices[f[j], :]
+
+    return m
+
 # Mesh STL file generating function
 def save_stl(side_vertices, side_faces, filename):
-    leg = mesh.Mesh(np.zeros(side_faces.shape[0], dtype=mesh.Mesh.dtype))
+    build_mesh(side_vertices, side_faces).save(filename)
 
-    for i, f in enumerate(side_faces):
-        for j in range(3):
-            leg.vectors[i][j] = side_vertices[f[j], :]
-
-    leg.save(filename)
+# Compute mesh inertial properties
+def compute_mass_properties(vertices, faces, density):
+    volume, cog, inertia = build_mesh(vertices, faces).get_mass_properties()
+    return volume * density, cog, inertia * density
 
 # Check if a valid configuration file is passed as an argument
 if len(sys.argv) != 2 or not Path(sys.argv[1]).is_file() or not sys.argv[1].endswith((".yaml", ".yml")):
@@ -52,11 +61,12 @@ with open(config_file, "r") as f:
     data = yaml.safe_load(f)
 
 # Load variables
-vars_to_import = ['hexagon_side', 'hexagon_thickness', 'leg_width', 'leg_length', 'leg_angle', 'leg_thickness']
+vars_to_import = ['hexagon_side', 'hexagon_thickness', 'leg_width', 'leg_length', 'leg_angle', 'leg_thickness', 'density']
 missing = [v for v in vars_to_import if v not in data]
 if missing:
     raise KeyError(f"Missing keys in YAML config file: {missing}")
-base_a, base_t, side_a, side_H, side_ang, side_c = (data[v] for v in vars_to_import) 
+base_a, base_t, side_a, side_H, side_ang, side_c, density_g_cm3 = (data[v] for v in vars_to_import)
+density = density_g_cm3 * 1000.0 # convert g/cm^3 to kg/m^3
 
 # Compute auxiliary dimensions
 side_h = (side_a / 2.0) * tan(radians(side_ang))
@@ -108,6 +118,10 @@ side_faces = np.array([[0,1,3], [1,2,3], [1,5,2], [5,6,2], [5,4,7], [5,7,6], [4,
 save_stl(base_vertices, base_faces, '../meshes/base.stl')
 save_stl(side_vertices, side_faces, '../meshes/leg.stl')
 
+# Mass properties of the base/leg shapes
+base_mass, base_cog, base_inertia = compute_mass_properties(base_vertices, base_faces, density)
+leg_mass, leg_cog, leg_inertia = compute_mass_properties(side_vertices, side_faces, density)
+
 # Link materials genersting function (for visualization/debugging)
 def generate_urdf_material_color(name, rgbs):
     r, g, b, a = rgbs
@@ -119,14 +133,19 @@ def generate_urdf_material_color(name, rgbs):
     ])
 
 # Link URDF string generating function
-def generate_link_urdf_str(link_name, mesh_name, offset=0):
+def generate_link_urdf_str(link_name, mesh_name, mass, cog, inertia, offset=0):
+    cog_x, cog_y, cog_z = cog[0] + offset, cog[1], cog[2]
+    ixx, ixy, ixz = inertia[0, 0], inertia[0, 1], inertia[0, 2]
+    iyy, iyz = inertia[1, 1], inertia[1, 2]
+    izz = inertia[2, 2]
+
     return "\n".join([
         '\t<link name="{}">'.format(link_name),
         '\t\t<inertial>',
-        '\t\t\t<mass value="0.01" />',
-        '\t\t\t<origin rpy="0 0 0" xyz="0 0 0"/>',
-        '\t\t\t<inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>',
-        '\t\t</inertial>',## TODO set correct link mass/inertias (for all links) if care about torques
+        '\t\t\t<mass value="{}" />'.format(mass),
+        '\t\t\t<origin rpy="0 0 0" xyz="{} {} {}"/>'.format(cog_x, cog_y, cog_z),
+        '\t\t\t<inertia ixx="{}" ixy="{}" ixz="{}" iyy="{}" iyz="{}" izz="{}"/>'.format(ixx, ixy, ixz, iyy, iyz, izz),
+        '\t\t</inertial>',
         '\t\t<visual>',
         '\t\t\t<origin rpy="0 0 0" xyz="{} 0 0"/>'.format(str(offset)),
         '\t\t\t<geometry>',
@@ -240,13 +259,13 @@ urdf.write(generate_urdf_material_color("Blue", (0, 0, 1, 1.0)))
 
 # Base hexagon link
 urdf.write('\n\t<!-- Base hexagon link -->\n')
-urdf.write(generate_link_urdf_str("base", "base"))
+urdf.write(generate_link_urdf_str("base", "base", base_mass, base_cog, base_inertia))
 
 # Legs lower links
 urdf.write('\t<!-- Legs lower links -->\n')
-urdf.write(generate_link_urdf_str("leg1", "leg"))
-urdf.write(generate_link_urdf_str("leg2", "leg"))
-urdf.write(generate_link_urdf_str("leg3", "leg"))
+urdf.write(generate_link_urdf_str("leg1", "leg", leg_mass, leg_cog, leg_inertia))
+urdf.write(generate_link_urdf_str("leg2", "leg", leg_mass, leg_cog, leg_inertia))
+urdf.write(generate_link_urdf_str("leg3", "leg", leg_mass, leg_cog, leg_inertia))
 
 # Joints connecting leg lower links to the hexagon base link (actuated DoFs)
 urdf.write('\t<!-- Joints connecting leg lower links to the hexagon base link -->\n')
@@ -256,9 +275,9 @@ urdf.write(generate_joint_urdf_str("l3", "base", "leg3", 0, 1.4, "0 1 0", [0, 0,
 
 # Legs upper links
 urdf.write('\t<!-- Legs upper links -->\n')
-urdf.write(generate_link_urdf_str("leg1top", "leg", side_H))
-urdf.write(generate_link_urdf_str("leg2top", "leg", side_H))
-urdf.write(generate_link_urdf_str("leg3top", "leg", side_H))
+urdf.write(generate_link_urdf_str("leg1top", "leg", leg_mass, leg_cog, leg_inertia, side_H))
+urdf.write(generate_link_urdf_str("leg2top", "leg", leg_mass, leg_cog, leg_inertia, side_H))
+urdf.write(generate_link_urdf_str("leg3top", "leg", leg_mass, leg_cog, leg_inertia, side_H))
 
 # Spherical joints connecting leg lower and upper links (unactuated DoFs)
 urdf.write('\t<!-- Spherical joints connecting leg lower and upper links -->\n')
@@ -268,7 +287,7 @@ urdf.write(generate_spherical_joint_urdf_str("leg3", "leg3top", "l3RotX", "l3Rot
 
 # Top hexagon link
 urdf.write('\t<!-- Top hexagon link -->\n')
-urdf.write(generate_link_urdf_str("top", "base", -base_r))
+urdf.write(generate_link_urdf_str("top", "base", base_mass, base_cog, base_inertia, -base_r))
 
 # Leg1 joint to top hexagon link
 urdf.write('\t<!-- Leg1 joint to top hexagon link -->\n')

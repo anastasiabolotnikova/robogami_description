@@ -4,3 +4,4 @@ leg_length: 0.06 #m
 leg_width: 0.05 #m 
 leg_angle: 50 #deg
 leg_thickness: 0.002 #m
+density: 1.25 #g/cm^3

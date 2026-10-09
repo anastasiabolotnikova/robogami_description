@@ -82,6 +82,13 @@ config_file = sys.argv[1]
 with open(config_file, "r") as f:
     data = yaml.safe_load(f)
 
+# Robot/mesh name for this config, e.g. "robogami" (baseline) or
+# "robogami_custom". Meshes are namespaced by it so that regenerating one
+# config's URDF cannot silently overwrite the mesh files another config's
+# already-generated URDF still refers to.
+suffix = Path(config_file).stem.replace("robogami_config_", "", 1)
+robot = "robogami" if suffix == "baseline" else f"robogami_{suffix}"
+
 # Load variables
 vars_to_import = ['hexagon_side', 'hexagon_thickness', 'leg_width', 'leg_length', 'leg_angle', 'leg_thickness', 'density', 'motor_mass']
 missing = [v for v in vars_to_import if v not in data]
@@ -145,8 +152,10 @@ if show_vertices:
 side_faces = np.array([[0,1,3], [1,2,3], [1,5,2], [5,6,2], [5,4,7], [5,7,6], [4,0,7], [3,7,0], [0,5,1], [0,4,5], [2,6,8], [6,9,8], [7,3,8], [7,8,9], [3,2,8], [6,7,9]])
 
 # Generate the base and leg mesh files
-save_stl(base_vertices, base_faces, '../meshes/base.stl')
-save_stl(side_vertices, side_faces, '../meshes/leg.stl')
+base_mesh_name = f"{robot}_base"
+leg_mesh_name = f"{robot}_leg"
+save_stl(base_vertices, base_faces, f'../meshes/{base_mesh_name}.stl')
+save_stl(side_vertices, side_faces, f'../meshes/{leg_mesh_name}.stl')
 
 # Mass properties of the base/leg shapes
 base_mass, base_cog, base_inertia = compute_mass_properties(base_vertices, base_faces, density)
@@ -278,8 +287,6 @@ def generate_contact_surface(parent_link, surface):
     ])
 
 # Write the URDF file (define links and joints)
-suffix = Path(config_file).stem.replace("robogami_config_", "", 1)
-robot = "robogami" if suffix == "baseline" else f"robogami_{suffix}"
 urdf = open("../urdf/"+robot+".urdf", "w")
 
 # URDF general info
@@ -297,13 +304,13 @@ urdf.write(generate_urdf_material_color("Blue", (0, 0, 1, 1.0)))
 
 # Base hexagon link
 urdf.write('\n\t<!-- Base hexagon link -->\n')
-urdf.write(generate_link_urdf_str("base", "base", base_with_motors_mass, base_with_motors_cog, base_with_motors_inertia))
+urdf.write(generate_link_urdf_str("base", base_mesh_name, base_with_motors_mass, base_with_motors_cog, base_with_motors_inertia))
 
 # Legs lower links
 urdf.write('\t<!-- Legs lower links -->\n')
-urdf.write(generate_link_urdf_str("leg1", "leg", leg_mass, leg_cog, leg_inertia))
-urdf.write(generate_link_urdf_str("leg2", "leg", leg_mass, leg_cog, leg_inertia))
-urdf.write(generate_link_urdf_str("leg3", "leg", leg_mass, leg_cog, leg_inertia))
+urdf.write(generate_link_urdf_str("leg1", leg_mesh_name, leg_mass, leg_cog, leg_inertia))
+urdf.write(generate_link_urdf_str("leg2", leg_mesh_name, leg_mass, leg_cog, leg_inertia))
+urdf.write(generate_link_urdf_str("leg3", leg_mesh_name, leg_mass, leg_cog, leg_inertia))
 
 # Joints connecting leg lower links to the hexagon base link (actuated DoFs)
 urdf.write('\t<!-- Joints connecting leg lower links to the hexagon base link -->\n')
@@ -313,9 +320,9 @@ urdf.write(generate_joint_urdf_str("l3", "base", "leg3", 0, 1.4, "0 1 0", [0, 0,
 
 # Legs upper links
 urdf.write('\t<!-- Legs upper links -->\n')
-urdf.write(generate_link_urdf_str("leg1top", "leg", leg_mass, leg_cog, leg_inertia, side_H))
-urdf.write(generate_link_urdf_str("leg2top", "leg", leg_mass, leg_cog, leg_inertia, side_H))
-urdf.write(generate_link_urdf_str("leg3top", "leg", leg_mass, leg_cog, leg_inertia, side_H))
+urdf.write(generate_link_urdf_str("leg1top", leg_mesh_name, leg_mass, leg_cog, leg_inertia, side_H))
+urdf.write(generate_link_urdf_str("leg2top", leg_mesh_name, leg_mass, leg_cog, leg_inertia, side_H))
+urdf.write(generate_link_urdf_str("leg3top", leg_mesh_name, leg_mass, leg_cog, leg_inertia, side_H))
 
 # Spherical joints connecting leg lower and upper links (unactuated DoFs)
 urdf.write('\t<!-- Spherical joints connecting leg lower and upper links -->\n')
@@ -325,7 +332,7 @@ urdf.write(generate_spherical_joint_urdf_str("leg3", "leg3top", "l3RotX", "l3Rot
 
 # Top hexagon link
 urdf.write('\t<!-- Top hexagon link -->\n')
-urdf.write(generate_link_urdf_str("top", "base", base_mass, base_cog, base_inertia, -base_r))
+urdf.write(generate_link_urdf_str("top", base_mesh_name, base_mass, base_cog, base_inertia, -base_r))
 
 # Leg1 joint to top hexagon link
 urdf.write('\t<!-- Leg1 joint to top hexagon link -->\n')

@@ -35,7 +35,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/base.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_base.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>
@@ -51,7 +51,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_leg.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>
@@ -66,7 +66,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_leg.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>
@@ -81,7 +81,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_leg.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>
@@ -122,7 +122,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0.059 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_leg.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>
@@ -137,7 +137,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0.059 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_leg.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>
@@ -152,7 +152,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="0.059 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/leg.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_leg.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>
@@ -253,7 +253,7 @@
 		<visual>
 			<origin rpy="0 0 0" xyz="-0.05629165124598851 0 0"/>
 			<geometry>
-				<mesh filename="package://robogami_description/meshes/base.stl"/>
+				<mesh filename="package://robogami_description/meshes/robogami_base.stl"/>
 			</geometry>
 			<material name="Gray"/>
 		</visual>

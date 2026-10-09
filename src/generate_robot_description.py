@@ -247,7 +247,9 @@ robot = "robogami" if suffix == "baseline" else f"robogami_{suffix}"
 urdf = open("../urdf/"+robot+".urdf", "w")
 
 # URDF general info
+config_lines = "\n".join("\t{}={}".format(k, v) for k, v in data.items())
 urdf.write('<?xml version="1.0" ?>\n')
+urdf.write('<!-- Generated from config file: {}\n{}\n-->\n'.format(config_file, config_lines))
 urdf.write('<robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">\n')
 
 # Materials

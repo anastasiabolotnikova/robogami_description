@@ -5,3 +5,4 @@ leg_width: 0.049 #m
 leg_angle: 40 #deg
 leg_thickness: 0.001 #m
 density: 1.25 #g/cm^3
+motor_mass: 65 #g

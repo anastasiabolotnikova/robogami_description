@@ -7,6 +7,7 @@
 	leg_angle=50
 	leg_thickness=0.002
 	density=1.25
+	motor_mass=65
 -->
 <robot name="Robogami" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -27,9 +28,9 @@
 	<!-- Base hexagon link -->
 	<link name="base">
 		<inertial>
-			<mass value="0.06495190518762683" />
-			<origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-			<inertia ixx="0.00013533813635752123" ixy="-0.0" ixz="-0.0" iyy="0.00013533811977819074" iyz="-0.0" izz="0.000270632954861109"/>
+			<mass value="0.25995190518762684" />
+			<origin rpy="0 0 0" xyz="3.336623893417374e-18 0.0 0.0"/>
+			<inertia ixx="0.0008665881363575214" ixy="0.0" ixz="0.0" iyy="0.0008665881197781907" iyz="0.0" izz="0.001733132954861109"/>
 		</inertial>
 		<visual>
 			<origin rpy="0 0 0" xyz="0 0 0"/>

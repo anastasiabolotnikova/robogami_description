@@ -55,6 +55,24 @@ def compute_mass_properties(vertices, faces, density):
     volume, cog, inertia = build_mesh(vertices, faces).get_mass_properties()
     return volume * density, cog, inertia * density
 
+# Add point mass representing motors
+def add_point_mass(mass, cog, inertia, extra_mass, extra_pos):
+    cog = np.asarray(cog, dtype=float)
+    extra_pos = np.asarray(extra_pos, dtype=float)
+    total_mass = mass + extra_mass
+
+    if total_mass == 0:
+        return total_mass, np.zeros(3), inertia
+
+    total_cog = (mass * cog + extra_mass * extra_pos) / total_mass
+
+    def parallel_axis_shift(point_mass, point):
+        d = point - total_cog
+        return point_mass * (np.dot(d, d) * np.eye(3) - np.outer(d, d))
+
+    total_inertia = inertia + parallel_axis_shift(mass, cog) + parallel_axis_shift(extra_mass, extra_pos)
+    return total_mass, total_cog, total_inertia
+
 # Check if a valid configuration file is passed as an argument
 if len(sys.argv) != 2 or not Path(sys.argv[1]).is_file() or not sys.argv[1].endswith((".yaml", ".yml")):
     sys.exit(f"Input config file error! Please specify a valid YAML file as an argument. Usage: {sys.argv[0]} <config.yaml>")
@@ -65,17 +83,25 @@ with open(config_file, "r") as f:
     data = yaml.safe_load(f)
 
 # Load variables
-vars_to_import = ['hexagon_side', 'hexagon_thickness', 'leg_width', 'leg_length', 'leg_angle', 'leg_thickness', 'density']
+vars_to_import = ['hexagon_side', 'hexagon_thickness', 'leg_width', 'leg_length', 'leg_angle', 'leg_thickness', 'density', 'motor_mass']
 missing = [v for v in vars_to_import if v not in data]
 if missing:
     raise KeyError(f"Missing keys in YAML config file: {missing}")
-base_a, base_t, side_a, side_H, side_ang, side_c, density_g_cm3 = (data[v] for v in vars_to_import)
+base_a, base_t, side_a, side_H, side_ang, side_c, density_g_cm3, motor_mass_g = (data[v] for v in vars_to_import)
 density = density_g_cm3 * 1000.0 # convert g/cm^3 to kg/m^3
+motor_mass = motor_mass_g / 1000.0 # convert g to kg
 
 # Compute auxiliary dimensions
 side_h = (side_a / 2.0) * tan(radians(side_ang))
 side_b = side_H - side_h
 base_r = sqrt(3.0)/2.0 * base_a
+
+# Assume motors attached at same place as leg links
+leg_attachment_positions = [
+    [-base_r, 0, 0],
+    [base_a/4.0*sqrt(3), -3.0*base_a/4.0, 0],
+    [base_a/4.0*sqrt(3), 3.0*base_a/4.0, 0],
+]
 
 # Define 12 3D vertices of a hexagonal base shape
 base_vertices = np.array([\
@@ -125,6 +151,12 @@ save_stl(side_vertices, side_faces, '../meshes/leg.stl')
 # Mass properties of the base/leg shapes
 base_mass, base_cog, base_inertia = compute_mass_properties(base_vertices, base_faces, density)
 leg_mass, leg_cog, leg_inertia = compute_mass_properties(side_vertices, side_faces, density)
+
+# The base plate carries the 3 leg actuators
+base_with_motors_mass, base_with_motors_cog, base_with_motors_inertia = base_mass, base_cog, base_inertia
+for motor_pos in leg_attachment_positions:
+    base_with_motors_mass, base_with_motors_cog, base_with_motors_inertia = add_point_mass(
+        base_with_motors_mass, base_with_motors_cog, base_with_motors_inertia, motor_mass, motor_pos)
 
 # Link materials genersting function (for visualization/debugging)
 def generate_urdf_material_color(name, rgbs):
@@ -265,7 +297,7 @@ urdf.write(generate_urdf_material_color("Blue", (0, 0, 1, 1.0)))
 
 # Base hexagon link
 urdf.write('\n\t<!-- Base hexagon link -->\n')
-urdf.write(generate_link_urdf_str("base", "base", base_mass, base_cog, base_inertia))
+urdf.write(generate_link_urdf_str("base", "base", base_with_motors_mass, base_with_motors_cog, base_with_motors_inertia))
 
 # Legs lower links
 urdf.write('\t<!-- Legs lower links -->\n')
@@ -275,9 +307,9 @@ urdf.write(generate_link_urdf_str("leg3", "leg", leg_mass, leg_cog, leg_inertia)
 
 # Joints connecting leg lower links to the hexagon base link (actuated DoFs)
 urdf.write('\t<!-- Joints connecting leg lower links to the hexagon base link -->\n')
-urdf.write(generate_joint_urdf_str("l1", "base", "leg1", 0, 1.4, "0 1 0", [0, 0, 0], [-base_r, 0, 0]))
-urdf.write(generate_joint_urdf_str("l2", "base", "leg2", 0, 1.4, "0 1 0", [0, 0, radians(120.0)], [base_a/4.0*sqrt(3), -3.0*base_a/4.0, 0]))
-urdf.write(generate_joint_urdf_str("l3", "base", "leg3", 0, 1.4, "0 1 0", [0, 0, radians(-120.0)], [base_a/4.0*sqrt(3), 3.0*base_a/4.0, 0]))
+urdf.write(generate_joint_urdf_str("l1", "base", "leg1", 0, 1.4, "0 1 0", [0, 0, 0], leg_attachment_positions[0]))
+urdf.write(generate_joint_urdf_str("l2", "base", "leg2", 0, 1.4, "0 1 0", [0, 0, radians(120.0)], leg_attachment_positions[1]))
+urdf.write(generate_joint_urdf_str("l3", "base", "leg3", 0, 1.4, "0 1 0", [0, 0, radians(-120.0)], leg_attachment_positions[2]))
 
 # Legs upper links
 urdf.write('\t<!-- Legs upper links -->\n')

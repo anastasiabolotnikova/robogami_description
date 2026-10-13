@@ -344,6 +344,7 @@ urdf.write('\t<link name="leg3TopMove"/>\n\n')
 urdf.write(generate_joint_urdf_str("l2TopMove", "leg2top", "leg2TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0], unactuated_joint_torque_limit, unactuated_joint_speed_limit))
 urdf.write(generate_joint_urdf_str("l3TopMove", "leg3top", "leg3TopMove", -1.56, 1.56, "0 1 0", [0, radians(-90.0), 0], [side_H, 0, 0], unactuated_joint_torque_limit, unactuated_joint_speed_limit))
 urdf.write(generate_fixed_joint_link("topCenter", "topCenter", "top", [0, radians(180.0), 0, -base_a*sqrt(3)/2.0, 0, 0]))
+urdf.write(generate_fixed_joint_link("endEffector", "ee", "topCenter", [0, radians(-90.0), 0, 0, 0, 0]))
 urdf.write(generate_fixed_joint_link("topleg2", "topleg2", "top", [0, radians(90.0), radians(-120.0), (base_a/4.0*sqrt(3)) - base_a*sqrt(3), -3.0*base_a/4.0, 0]))
 urdf.write(generate_fixed_joint_link("topleg3", "topleg3", "top", [0, radians(90.0), radians(120.0), (base_a/4.0*sqrt(3)) - base_a*sqrt(3), 3.0*base_a/4.0, 0]))
 

@@ -301,6 +301,14 @@
 		<origin rpy="0 3.141592653589793 0" xyz="-0.08660254037844387 0 0"/>
 	</joint>
 
+	<link name="endEffector"/>
+
+	<joint name="ee" type="fixed">
+		<parent link="topCenter"/>
+		<child link="endEffector"/>
+		<origin rpy="0 -1.5707963267948966 0" xyz="0 0 0"/>
+	</joint>
+
 	<link name="topleg2"/>
 
 	<joint name="topleg2" type="fixed">

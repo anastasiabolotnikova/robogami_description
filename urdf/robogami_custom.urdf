@@ -306,7 +306,7 @@
 	<joint name="ee" type="fixed">
 		<parent link="topCenter"/>
 		<child link="endEffector"/>
-		<origin rpy="0 -1.5707963267948966 0" xyz="0 0 0"/>
+		<origin rpy="3.141592653589793 -1.5707963267948966 0" xyz="0 0 0"/>
 	</joint>
 
 	<link name="topleg2"/>
